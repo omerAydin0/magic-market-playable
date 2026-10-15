@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Magic Market Creative Line</title>
+<meta name="description" content="Playable ads for my own game, Magic Market. AI agents look at other games' ads, come up with new ads and build them; code checks every one.">
+<meta property="og:title" content="Playable ads for my own game, made with AI agents">
+<meta property="og:description" content="Play the ads the agents made for Magic Market, and see how they are made and checked.">
+<style>
+:root{--ink:#24123f;--soft:#66597f;--line:#e3daf2;--paper:#f8f5fd;--card:#fff;--main:#6a35c9;--on-main:#fff;--deep:#2c1257;--on-deep:#fff;--deep-soft:#d3c4f3;--sun:#ffc93c;--good:#1f9d55;--chip:#efe7fb;--gold-bg:#fff1c7;--gold-ink:#7a5200;--green-bg:#e3f4ea;--green-ink:#17683a;--note-bg:#fff8e1;--note-line:#f1dfa0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#efe8fb;--soft:#b3a6cb;--line:#3a2c55;--paper:#140a22;--card:#1e1431;--main:#b48cff;--on-main:#1a0d2e;--deep:#3a1d6e;--on-deep:#fff;--deep-soft:#d8cbf5;--sun:#ffc93c;--good:#5fd18f;--chip:#2c2142;--gold-bg:#3d3112;--gold-ink:#ffd66b;--green-bg:#173a27;--green-ink:#7fe0a6;--note-bg:#2a2311;--note-line:#5a4a1c;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#efe8fb;--soft:#b3a6cb;--line:#3a2c55;--paper:#140a22;--card:#1e1431;--main:#b48cff;--on-main:#1a0d2e;--deep:#3a1d6e;--on-deep:#fff;--deep-soft:#d8cbf5;--sun:#ffc93c;--good:#5fd18f;--chip:#2c2142;--gold-bg:#3d3112;--gold-ink:#ffd66b;--green-bg:#173a27;--green-ink:#7fe0a6;--note-bg:#2a2311;--note-line:#5a4a1c;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--main)}
+img,video{max-width:100%;display:block}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+nav b{font-size:18px}
+nav a{font-weight:600;text-decoration:none}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.12;margin:0 0 16px;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:clamp(24px,3.4vw,32px);line-height:1.2;margin:0 0 10px;letter-spacing:-.01em}
+h3{font-size:18px;line-height:1.3;margin:0 0 6px}
+p{margin:0 0 14px}
+.lead{font-size:19px;color:var(--soft);max-width:34em}
+section{padding:54px 0;border-top:1px solid var(--line)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:22px 0 60px;border:0}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-block;padding:12px 20px;border-radius:12px;font-weight:700;text-decoration:none;border:2px solid var(--main);color:var(--main)}
+.btn.main{background:var(--main);color:var(--on-main)}
+.btn:focus-visible,.chip:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.phone{width:min(100%,320px);aspect-ratio:9/18.5;margin:0 auto;border-radius:34px;border:9px solid #1a0a35;background:#1a0a35;overflow:hidden;box-shadow:0 24px 50px rgba(44,18,87,.28)}
+.phone iframe{width:100%;height:100%;border:0;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0 8px}
+.chip{font:inherit;font-size:14px;font-weight:600;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--deep);border-color:var(--deep);color:var(--on-deep)}
+.pick{text-align:center;font-size:15px;color:var(--soft);margin:0 auto 12px;max-width:24em}
+.pick b{color:var(--ink)}
+.group{margin-top:12px;text-align:center}
+.glabel{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--main)}
+.group .chips{margin:6px 0 0}
+details{margin-top:6px}
+summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--main)}
+.caption{text-align:center;font-size:14px;color:var(--soft);min-height:3.2em;max-width:24em;margin:0 auto}
+.caption b{color:var(--ink)}
+.inout{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:28px;align-items:start;margin-top:22px}
+pre{margin:0;background:#1d0c3b;color:#e6dcff;border-radius:14px;padding:16px 18px;font:13.5px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;white-space:pre-wrap}
+pre i{color:#ffd66b;font-style:normal}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;padding:0 0 40px;border:0}
+.stat{background:var(--deep);color:var(--on-deep);border-radius:14px;padding:14px}
+.stat b{display:block;font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--deep-soft)}
+.flow{margin:18px 0 0;padding-left:22px;max-width:46em}
+.flow li{margin:0 0 12px;padding-left:4px}
+.flow .who{margin-right:6px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.three img{border-radius:12px;border:1px solid var(--line);width:100%}
+.three figcaption{text-align:center;font-weight:700;color:var(--ink);font-size:15px}
+figure{margin:0}
+figcaption{font-size:14px;color:var(--soft);margin-top:8px}
+.note{font-size:15.5px;color:var(--soft);margin:14px 0 0}
+.outs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:22px}
+.out{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.out b{display:block;font-size:22px}
+.out span{font-size:14.5px;color:var(--soft)}
+.name{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.name div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center}
+.name b{display:block;font:600 14px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace}
+.name span{font-size:12px;color:var(--soft);letter-spacing:.04em;text-transform:uppercase}
+.videos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px}
+.vid{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.vid video{width:100%;aspect-ratio:9/16;background:#1a0a35}
+.vid div{padding:12px 14px 14px}
+.vid p{font-size:14.5px;color:var(--soft);margin:0 0 8px}
+.vid p b{color:var(--ink)}
+.vid .small{font-size:13.5px}
+.checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+.checks.by3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.check{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.check p{font-size:15.5px;color:var(--soft);margin:0}
+.check p b{color:var(--ink);font-weight:600}
+.check small{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main);margin-bottom:4px}
+.tag{display:inline-block;margin-top:10px;font-size:12px;font-weight:800;letter-spacing:.06em;padding:2px 8px;border-radius:6px;background:var(--chip);color:var(--soft)}
+.tag.agent{background:var(--gold-bg);color:var(--gold-ink)}
+.steps td:first-child{font-weight:700;white-space:nowrap}
+.who{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.who.ai{background:var(--gold-bg);color:var(--gold-ink)}
+.who.code{background:var(--green-bg);color:var(--green-ink)}
+.quote{background:var(--card);border-left:4px solid var(--main);border-radius:0 12px 12px 0;padding:14px 18px;margin-top:18px;font-size:16px}
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:22px}
+.num{background:var(--deep);color:var(--on-deep);border-radius:14px;padding:16px}
+.num b{display:block;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.num span{font-size:14px;color:var(--deep-soft)}
+table{border-collapse:collapse;width:100%;margin-top:18px;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--line);font-size:15.5px}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--soft)}
+tr:last-child td{border-bottom:0}
+.tablewrap{overflow-x:auto}
+.todo{background:var(--note-bg);border:1px solid var(--note-line);border-radius:14px;padding:18px 20px;margin-top:20px}
+.todo ul{margin:8px 0 0;padding-left:20px}
+footer{padding:34px 0 60px;border-top:1px solid var(--line);color:var(--soft);font-size:15px}
+footer a{font-weight:600}
+@media (max-width:820px){
+  .hero,.inout{grid-template-columns:1fr}
+  .videos{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nums,.outs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .checks,.checks.by3{grid-template-columns:1fr}
+  section{padding:40px 0}
+}
+@media (max-width:460px){
+  body{font-size:16px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .three{gap:6px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav>
+  <b>Magic Market · playable ads</b>
+  <a href="#how">How it works</a>
+</nav>
+
+<header class="hero" id="top">
+  <div>
+    <h1>Playable ads for my own game, made with AI agents</h1>
+    <p class="lead">Magic Market is a match-3 game I'm making in Unity. I built a small system that makes its playable ads. AI agents look at other games' ads, come up with new ad ideas and build each one as a little game. Code checks everything that can be measured: file size, layout, and that the ad can actually be won.</p>
+    <p class="lead">You can play every ad in the phone. Pick one from the list under it; the new ones the agents made come first.</p>
+    <div class="btns">
+      <a class="btn main" href="#play">Play the ads</a>
+      <a class="btn" href="#new">See the new ads</a>
+    </div>
+  </div>
+  <div id="play">
+    <p class="pick"><b>Pick an ad to play.</b> Tap a name and it loads in the phone.</p>
+    <div class="phone"><iframe id="ad" title="The playable ad" src="play/relax-royal.html" allow="autoplay"></iframe></div>
+    <p class="caption" id="caption"></p>
+    <div class="group"><span class="glabel">New ads made by the agents</span><div class="chips" id="chips-new"></div></div>
+    <div class="group"><span class="glabel">My main ad and its test versions</span><div class="chips" id="chips-main"></div></div>
+    <p class="caption"><a id="full" href="play/relax-royal.html">Open it full screen</a> · sound starts on your first tap</p>
+  </div>
+</header>
+
+<section class="stats" aria-label="The numbers">
+  <div class="stat"><b>18</b><span>ads built</span></div>
+  <div class="stat"><b>5 min</b><span>to build and check all of them</span></div>
+  <div class="stat"><b>339</b><span>checks, 0 failed</span></div>
+  <div class="stat"><b>9</b><span>A/B tests ready to run</span></div>
+  <div class="stat"><b>218</b><span>automated tests</span></div>
+  <div class="stat"><b>1.98 MB</b><span>biggest file, of Meta's 2 MB</span></div>
+</section>
+
+<section id="how">
+  <h2>How it works</h2>
+  <ol class="flow">
+    <li><span class="who ai">AI</span><b>Look.</b> An agent reads ads that other match games are running and writes a short note on each.</li>
+    <li><span class="who ai">AI</span><b>Ideas.</b> Another agent turns the notes into ideas for new ads and into tests for my main ad. When an idea needs new art, it asks for it and Figma's image model paints it.</li>
+    <li><span class="who ai">AI</span><span class="who code">Code</span><b>Build.</b> Agents build each idea as a small game. Code then makes it for four ad networks, plays it 3,000 times with bots, and takes pictures and a video.</li>
+    <li><span class="who ai">AI</span><b>Review.</b> A reviewer agent looks at every picture. Only ads it passes go into the upload folder.</li>
+    <li><span class="who code">Code</span><span class="who ai">AI</span><b>Results.</b> Once ads run, code picks winners with fixed rules and the agent explains what they mean.</li>
+  </ol>
+  <p class="note">Nothing an agent makes is used until a check in code passes. I play everything myself, throw out what I don't like and send the rest back with notes.</p>
+  <details><summary>The check at every step</summary>
+  <div class="tablewrap">
+  <table class="steps">
+    <tr><th>Step</th><th>Who</th><th>What happens</th><th>What stops a bad result</th></tr>
+    <tr><td>1 Look at the market</td><td><span class="who ai">AI</span></td><td>Reads other games' ads and writes a short note on each, using a fixed list of words.</td><td>Code does the counting, so "most ads do X" is a count, not the agent's opinion.</td></tr>
+    <tr><td>2 Write tests</td><td><span class="who ai">AI</span></td><td>Turns what it saw into tests for my ad. Each test asks one question and changes one thing.</td><td>Rejected if it changes two things, repeats an old test or makes a claim the game can't back.</td></tr>
+    <tr><td>3 New ad ideas</td><td><span class="who ai">AI</span></td><td>One agent writes ideas for new ads and can ask for new art. Other agents build each idea as a small game.</td><td>An idea has to point to the ads it came from. A game has to build for every network, be won by following the hand, not be won by random tapping, and fit the screen.</td></tr>
+    <tr><td>4 Build and check</td><td><span class="who code">Code</span></td><td>Builds every ad for four networks, plays each one 3,000 times with bots, and takes stills and a video.</td><td>15 or 21 or 22 checks per ad. If a file is too big for a network, the build fails.</td></tr>
+    <tr><td>5 Look at it</td><td><span class="who ai">AI</span></td><td>Opens every picture and asks: does it read, is it true, and can you see the thing the test changes?</td><td>A review only counts for the exact file it looked at. Only ads that pass go into the upload folder.</td></tr>
+    <tr><td>6 Read the results</td><td><span class="who code">Code</span>, then <span class="who ai">AI</span></td><td>Code decides each test with fixed rules. The agent explains the result and suggests what to test next.</td><td>Its reading has to agree with the code's.</td></tr>
+  </table>
+  </div>
+  <p class="note">The agents run in Claude Code; their instructions are in <code>.claude/agents/</code>. No ad has run on a network yet, so step 6 has only been tried with numbers I made up.</p>
+  </details>
+</section>
+
+<section id="new">
+  <h2>New ads the agents made</h2>
+  <p class="lead">One agent read notes on 25 ads from other match games and wrote ideas for new ones. Other agents built each idea as a small game, from scratch. Some ideas needed new art, which was painted with Figma's image model. I played every ad, threw out the ones I didn't like, and sent some back for another pass. All of them can be played in the phone above.</p>
+  <div class="videos">
+<div class="vid concept">
+<video controls playsinline preload="none" poster="img/concept-gnome-heist.jpg" src="video/concept-gnome-heist.mp4"></video>
+<div><h3>Gnome heist</h3>
+<p><b>“Stop the potion thieves!”</b></p>
+<p>Masked gnomes drop through the skylight to steal potions. Tap them before they get away.</p>
+<p class="small">Won in 12.9 s by someone who follows the hand · reviewer: PASS</p>
+<details><summary>Where the idea came from</summary><p class="small">The Township ad 1357796043000700 opens on pressure at a shop counter caused by little characters (an angry queue) and the Gardenscapes ad 1353141253558181 makes the game&#x27;s own characters actors in a scene with a problem in the first second; the Tile Journey ad 1609378840598104 opens on a night-time drama before any board. AppGrowing reads &#x27;character pressure&#x27; and &#x27;failed moments&#x27; as first-three-second hooks in puzzle ads, and its Royal Match analysis says to keep the role (someone the viewer must stop or save) with your own characters; the owner liked the grumpy gnomes, so here they are the villains. A gnome sliding down a rope and shushing the viewer is something happening at frame 0, and the one verb (tap the thief) is graspable at once, as Segwise says a playable must be.</p><p class="small">Based on: <a href="https://www.facebook.com/ads/library/?id=1357796043000700">a Township Mobile ad</a>, <a href="https://www.facebook.com/ads/library/?id=1353141253558181">a Gardenscapes ad</a>, <a href="https://www.facebook.com/ads/library/?id=1609378840598104">a Tile Journey - Matching Puzzle App ad</a>, <a href="https://appgrowing.net/blog/en/puzzle-game-advertising-trends-how-ua-teams-should-read-a-smaller-creative-pool/">appgrowing.net</a>, <a href="https://appgrowing.net/blog/en/royal-match-ad-creative-analysis-king-in-peril-hooks-and-pick-ctas/">appgrowing.net</a>, <a href="https://segwise.ai/blog/produce-playable-ads-at-scale">segwise.ai</a>, <a href="https://mdm.co/why-do-mobile-gaming-companies-use-fake-ads">mdm.co</a></p></details>
+<span class="tag">plays differently from the game</span></div></div>
+<div class="vid concept">
+<video controls playsinline preload="none" poster="img/concept-lights-out.jpg" src="video/concept-lights-out.mp4"></video>
+<div><h3>Lights out in the village</h3>
+<p><b>“Find them in the dark!”</b></p>
+<p>The candles blow out and the village goes dark. Your finger is a lantern: find what is hiding.</p>
+<p class="small">Won in 16.5 s by someone who follows the hand · reviewer: PASS</p>
+<details><summary>Where the idea came from</summary><p class="small">The Match Factory ad 2120020998587567 is the closest thing in the research to our world and the owner&#x27;s chosen reference: a whole painted purple witch&#x27;s village at night, seen from above, things to find tucked into it, and a dimmed screen before the tap; here the dimming becomes the play, and the painting is a scene rather than props on a wall. The hidden-object ads 4102418863382110 (&#x27;FIND IT IF YOU CAN&#x27;, a crowded painted picture) and 1530226415798545 (a busy isometric town searched with a finger) show the genre selling search in a painted picture, and searching with a lantern is one verb that is graspable at once, as Segwise says a playable must be. MDM argues unusual concepts are how algorithmic platforms find audiences; Segwise warns that ads with a play the game lacks carry a risk, so this one says it does not show the game.</p><p class="small">Based on: <a href="https://www.facebook.com/ads/library/?id=2120020998587567">a Match Factory ad</a>, <a href="https://www.facebook.com/ads/library/?id=4102418863382110">a Triple Match 3D ad</a>, <a href="https://www.facebook.com/ads/library/?id=1530226415798545">a Triple Match City: Tile Puzzle Game ad</a>, <a href="https://segwise.ai/blog/produce-playable-ads-at-scale">segwise.ai</a>, <a href="https://mdm.co/why-do-mobile-gaming-companies-use-fake-ads">mdm.co</a>, <a href="https://segwise.ai/blog/fake-ads-and-mobile-gaming-how-studios-balance-clickbait-gameplay-integrity-and-profitability-cm7j2hc9s00bvip0l0r4k59lw">segwise.ai</a></p></details>
+<span class="tag">plays differently from the game</span></div></div>
+<div class="vid concept">
+<video controls playsinline preload="none" poster="img/concept-grumpy-gnomes.jpg" src="video/concept-grumpy-gnomes.mp4"></video>
+<div><h3>Serve the grumpy gnomes</h3>
+<p><b>“Serve the grumpy gnomes!”</b></p>
+<p>Grumpy gnomes shout their orders at the counter. Match three of what each one wants.</p>
+<p class="small">Won in 12.72 s by someone who follows the hand · reviewer: PASS</p>
+<details><summary>Where the idea came from</summary><p class="small">The Township ad 1357796043000700 opens on a pressure moment and not a board: a crowd queuing at a counter turns angry, red faces and a speech bubble asking for three eggs; Gardenscapes 1353141253558181 turns the game&#x27;s own characters into actors with a problem in the first second. AppGrowing reads &#x27;character pressure&#x27; as a first-three-second hook in puzzle ads, and its Royal Match analysis says to keep the role (someone who needs the viewer) with your own character, not to copy theirs. Unlike the subtitled streamer of 1530226415798545, the one who speaks here is a gnome of the shop, speaking as himself; and what the viewer plays is the game&#x27;s own cabinet, depth and tray.</p><p class="small">Based on: <a href="https://www.facebook.com/ads/library/?id=1357796043000700">a Township Mobile ad</a>, <a href="https://www.facebook.com/ads/library/?id=1353141253558181">a Gardenscapes ad</a>, <a href="https://www.facebook.com/ads/library/?id=1530226415798545">a Triple Match City: Tile Puzzle Game ad</a>, <a href="https://appgrowing.net/blog/en/puzzle-game-advertising-trends-how-ua-teams-should-read-a-smaller-creative-pool/">appgrowing.net</a>, <a href="https://appgrowing.net/blog/en/royal-match-ad-creative-analysis-king-in-peril-hooks-and-pick-ctas/">appgrowing.net</a></p></details>
+<span class="tag">plays differently from the game</span></div></div>
+<div class="vid concept">
+<video controls playsinline preload="none" poster="img/concept-cat-behind-jars.jpg" src="video/concept-cat-behind-jars.mp4"></video>
+<div><h3>Cat behind the jars</h3>
+<p><b>“I can&#x27;t get the cat out!”</b></p>
+<p>The shop cat is locked behind golden bars. Clear the whole cabinet to set it free.</p>
+<p class="small">Won in 15.85 s by someone who follows the hand · reviewer: PASS</p>
+<details><summary>Where the idea came from</summary><p class="small">Royal Match&#x27;s ads open on a character in danger and only then show a solvable board, and the wider market runs fail-first and rescue hooks that none of our 13 genre ads uses (only one of them is tense). The first frame borrows the helpless first-person line of 906802798922176 (&#x27;I can&#x27;t find the right place for burger&#x27;) and the drama-before-play of 1609378840598104, but with a character the shop already has, so what the viewer then plays is the game&#x27;s own tray and depth rule.</p><p class="small">Based on: <a href="https://www.facebook.com/ads/library/?id=906802798922176">a Triple Match City: Tile Puzzle Game ad</a>, <a href="https://www.facebook.com/ads/library/?id=1609378840598104">a Tile Journey - Matching Puzzle App ad</a>, <a href="https://appgrowing.net/blog/en/royal-match-ad-creative-analysis-king-in-peril-hooks-and-pick-ctas/">appgrowing.net</a>, <a href="https://appgrowing.net/blog/en/puzzle-game-advertising-trends-how-ua-teams-should-read-a-smaller-creative-pool/">appgrowing.net</a>, <a href="https://segwise.ai/blog/fake-ads-and-mobile-gaming-how-studios-balance-clickbait-gameplay-integrity-and-profitability-cm7j2hc9s00bvip0l0r4k59lw">segwise.ai</a></p></details>
+<span class="tag">plays differently from the game</span></div></div>
+<div class="vid concept">
+<video controls playsinline preload="none" poster="img/concept-wrong-pick-toad.jpg" src="video/concept-wrong-pick-toad.mp4"></video>
+<div><h3>Wrong pick, toad!</h3>
+<p><b>“Wrong pick = toad!”</b></p>
+<p>A gnome orders a potion. Pick the wrong ingredient and he turns into a toad.</p>
+<p class="small">Won in 7.63 s by someone who follows the hand · reviewer: PASS</p>
+<details><summary>Where the idea came from</summary><p class="small">Choice playables, where the viewer picks the good or the bad outcome, came back in late 2025, and Royal Match ends its peril ads on &#x27;Pick or Try Again&#x27;. Two of our 13 &#x27;match&#x27; ads (1419301390120911, 906802798922176) open on a different little puzzle altogether; the gnome-to-toad joke is absurd enough to stop a thumb, and it uses the game&#x27;s own objects as a recipe, which the game never does.</p><p class="small">Based on: <a href="https://www.facebook.com/ads/library/?id=1419301390120911">a Triple Match 3D ad</a>, <a href="https://www.facebook.com/ads/library/?id=906802798922176">a Triple Match City: Tile Puzzle Game ad</a>, <a href="https://lancaric.substack.com/p/playable-ads-trends-in-mobile-games-860">lancaric.substack.com</a>, <a href="https://appgrowing.net/blog/en/royal-match-ad-creative-analysis-king-in-peril-hooks-and-pick-ctas/">appgrowing.net</a>, <a href="https://mdm.co/why-do-mobile-gaming-companies-use-fake-ads">mdm.co</a></p></details>
+<span class="tag">plays differently from the game</span></div></div>
+<div class="vid concept">
+<video controls playsinline preload="none" poster="img/concept-clears-itself.jpg" src="video/concept-clears-itself.mp4"></video>
+<div><h3>It clears itself... almost</h3>
+<p><b>“It clears itself... almost”</b></p>
+<p>The cabinet starts clearing itself, then stops and hands the rest to you.</p>
+<p class="small">Won in 16.4 s by someone who follows the hand · reviewer: PASS</p>
+<details><summary>Where the idea came from</summary><p class="small">Ad 879280074426551 clears sets with no hand at all and 368730629097956 clears them in a golden burst; Screwdom&#x27;s top playables are all gameplay and most cut off mid-play, and sort-game ads open on a half-done level whose first moves come by themselves. Satisfying loops are a named 2025 trend; here the satisfaction is shown first and handed over the moment it stops, and everything the viewer plays is the game&#x27;s own rule, ending on the potion the game really brews.</p><p class="small">Based on: <a href="https://www.facebook.com/ads/library/?id=879280074426551">a Goods Sort Match ad</a>, <a href="https://www.facebook.com/ads/library/?id=368730629097956">a Goods Sort ad</a>, <a href="https://segwise.ai/blog/screwdom-ad-strategy-creative-patterns.md">segwise.ai</a>, <a href="https://www.playturbo.com/blog/creative-tips-for-color-sorting-game-ads">playturbo.com</a>, <a href="https://lancaric.substack.com/p/creative-trends-june-2025">lancaric.substack.com</a>, <a href="https://segwise.ai/blog/produce-playable-ads-at-scale">segwise.ai</a></p></details>
+</div></div>
+<div class="vid concept">
+<video controls playsinline preload="none" poster="img/concept-boiling-over.jpg" src="video/concept-boiling-over.mp4"></video>
+<div><h3>It&#x27;s boiling over!</h3>
+<p><b>“It&#x27;s boiling over!”</b></p>
+<p>The cauldron is boiling over. Pop the bubbles and match three to calm it down.</p>
+<p class="small">Won in 18.28 s by someone who follows the hand · reviewer: PASS</p>
+<details><summary>Where the idea came from</summary><p class="small">The glossy balloon ad 790321796872730 and the branded-balloon ad 9463594760372063 both open on big round glossy things already moving (a pile still filling, a tower turning) with a tray waiting above or beside it, and the Dream Family board 1534163700944112 opens on bursts with no hand at all: motion in the first frame, not a still shelf. AppGrowing reads &#x27;character pressure&#x27; as one of the first-three-second hooks of puzzle ads, Segwise says a playable must be graspable in three seconds with one verb, and satisfying loops (popping, bursting) are a named 2025 trend; here the pressure is the witch&#x27;s own pot and the one verb is pop.</p><p class="small">Based on: <a href="https://www.facebook.com/ads/library/?id=790321796872730">a Balloon Triple Match Online ad</a>, <a href="https://www.facebook.com/ads/library/?id=9463594760372063">a Goods Sort ad</a>, <a href="https://www.facebook.com/ads/library/?id=1534163700944112">a Dream Family - Match 3 Games ad</a>, <a href="https://appgrowing.net/blog/en/puzzle-game-advertising-trends-how-ua-teams-should-read-a-smaller-creative-pool/">appgrowing.net</a>, <a href="https://segwise.ai/blog/produce-playable-ads-at-scale">segwise.ai</a>, <a href="https://lancaric.substack.com/p/creative-trends-june-2025">lancaric.substack.com</a></p></details>
+<span class="tag">plays differently from the game</span></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Versions of the main ad</h2>
+  <p class="lead">These videos are the ads playing themselves. Code recorded them; nobody filmed a screen.</p>
+  <div class="videos" id="videos"></div>
+</section>
+
+<section id="round">
+  <h2>What other games' ads do</h2>
+  <p class="lead">I collected 25 of the most-shown ads from match games in Meta's Ad Library. An agent wrote a note on each one, and code counted the notes.</p>
+  <div class="nums">
+    <div class="num"><b>15 of 25</b><span>show a hand playing</span></div>
+    <div class="num"><b>three</b><span>tests the agent wrote from them</span></div>
+    <div class="num"><b>seven</b><span>ideas my ad can't test yet, saved for later</span></div>
+    <div class="num"><b>18</b><span>ads the reviewer passed</span></div>
+  </div>
+  <p class="note"><b>How they open:</b> full-board 13 of 25, challenge-text 4 of 25, person-or-story 4 of 25. <b>What their words promise:</b> brain 6 of 25, relax 6 of 25, challenge 4 of 25, offline 4 of 25. Two of the most common promises, brain training and playing offline, are ones my ad can't make honestly, and the agent left them out without being told.</p>
+</section>
+
+<section id="eval">
+  <h2>Can the reviewer say no?</h2>
+  <p class="lead">A reviewer that passes everything is useless. So I hid six problems in ten ads and gave all ten to the reviewer without telling it. It caught 6 of 6 and passed 4 of 4 of the clean ones.</p>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Case</th><th>What I hid</th><th>Should say</th><th>Said</th><th>Right</th><th>Its reason</th></tr>
+    <tr><td>clean-7x7</td><td>nothing</td><td>PASS</td><td>PASS</td><td>yes</td><td>Headline &#x27;Brew your own potion!&#x27; matches the manifest in all nine stills; colour is the royal purple; shelves, tray, cauldron and PLAY NOW are on screen and uncovered in all stills.</td></tr><tr><td>clean-orange-cat</td><td>nothing</td><td>PASS</td><td>PASS</td><td>yes</td><td>Boards are identical to the control apart from the cat; headline &#x27;Brew your own potion!&#x27; matches the manifest.</td></tr><tr><td>headline-gone</td><td>the headline is painted over in every picture</td><td>REVISE</td><td>REVISE</td><td>yes</td><td>The manifest headline &#x27;The tray is almost full!&#x27; is not on screen in any hook or set still (9x16, 1x1, 191x100): the top band above the cabinet is empty purple.</td></tr><tr><td>wrong-words</td><td>the settings say one headline; the pictures show another</td><td>REVISE</td><td>REVISE</td><td>yes</td><td>The headline in the pictures is &#x27;Brew your own potion!&#x27; but the manifest (and tags) say &#x27;Relax and brew a potion&#x27;: hook-9x16, hook-1x1, hook-191x100 and the set and end stills all show the …</td></tr><tr><td>button-covered</td><td>the store button is painted over in every picture</td><td>REVISE</td><td>REVISE</td><td>yes</td><td>A flat brown rectangle covers the PLAY NOW button in every hook and set still (hook-9x16, set-9x16, hook-1x1, set-1x1, hook-191x100, set-191x100): only a sliver of the green button shows at …</td></tr><tr><td>clean-sunset</td><td>nothing</td><td>PASS</td><td>PASS</td><td>yes</td><td>Headline in the pictures (&#x27;The tray is almost full!&#x27;) matches the manifest; it fits and is legible in all sizes.</td></tr><tr><td>wrong-colour</td><td>the settings say emerald; the pictures are the purple control&#x27;s</td><td>REVISE</td><td>REVISE</td><td>yes</td><td>The manifest says theme &#x27;emerald&#x27; (tag theme=emerald), but every still, at 9x16, 1x1 and 191x100, is the game&#x27;s purple, identical in colour to relax-royal.</td></tr><tr><td>cut-off</td><td>the 9:16 pictures are shifted so the cabinet&#x27;s right side is cut off</td><td>REVISE</td><td>REVISE</td><td>yes</td><td>All three 9x16 stills (hook, set, end) are broken: the picture is shifted right with a black bar over the left ~158 px, and the right side is cropped.</td></tr><tr><td>clean-emerald</td><td>nothing</td><td>PASS</td><td>PASS</td><td>yes</td><td>Headline &#x27;Brew your own potion!&#x27; matches the manifest, whole and legible on the green at all sizes.</td></tr><tr><td>false-promise</td><td>the headline promises matching four; the game matches three</td><td>REVISE</td><td>REVISE</td><td>yes</td><td>The headline in every hook, set and end still reads &#x27;Match 4 to brew a potion!&#x27;. The game is a triple match (&#x27;Three alike in the tray leave it&#x27;, briefs/README.md) and the set stills show …</td></tr>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>One change at a time</h2>
+  <p class="lead">My <a href="https://omeraydin0.github.io/word-tile-playable/">first project</a>, for a word game, made it cheap to make many versions of an ad. But if two versions differ in three things and one does better, you still don't know why.</p>
+  <p>So here every test changes exactly one thing. I write the question and name what stays the same, and the system writes the versions. If a version differs in two things, it is refused.</p>
+</section>
+
+<section>
+  <h2>A question goes in</h2>
+  <p class="lead">A friend who is a 2D artist played the ad and said the objects were too small on a phone. That became a test.</p>
+  <div class="inout">
+    <pre>{
+  &quot;kind&quot;: &quot;iteration&quot;,
+  &quot;question&quot;: &quot;Does the 7x7 cabinet, fuller but with smaller objects, do better than the 6x6?&quot;,
+  &quot;control&quot;: <i>&quot;relax-royal&quot;</i>,
+  &quot;field&quot;: <i>&quot;board&quot;</i>,
+  &quot;values&quot;: [
+    &quot;7x7&quot;
+  ],
+  &quot;read&quot;: &quot;ipm&quot;,
+  &quot;min_impressions&quot;: 5000,
+  &quot;min_lift&quot;: 0.1
+}</pre>
+    <div>
+      <div class="three">
+        <figure><img src="img/relax-royal.jpg" alt="The ad with a 6 by 6 cabinet" loading="lazy"><figcaption>6×6, the control</figcaption></figure>
+        <figure><img src="img/relax-royal-7x7.jpg" alt="The same ad with a 7 by 7 cabinet" loading="lazy"><figcaption>7×7</figcaption></figure>
+      </div>
+      <p class="note">Only the cabinet is different, so any difference in results comes from the cabinet. The test started with 8×8; after playing it I dropped the 8×8 and made 6×6 the control.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tests">
+  <h2>The nine tests so far</h2>
+  <p class="lead">I wrote most of them. The agent wrote three from what it saw in other ads. None has run on a network yet.</p>
+  <div class="checks">
+<div class="check">
+<small>Test 01 · changes the whole idea</small>
+<h3>Which opening makes more people play and install: a calm full cabinet, or a tray that is almost full?</h3>
+<p><b>Control:</b> a calm, full cabinet<br>
+<b>Against it:</b> a tray that is almost full<br>
+<b>Decided by:</b> installs per thousand shown</p>
+<span class="tag">NOT RUN</span>
+</div>
+<div class="check">
+<small>Test 02 · changes the cabinet size</small>
+<h3>Does the 7x7 cabinet, fuller but with smaller objects, do better than the 6x6?</h3>
+<p><b>Control:</b> 6×6<br>
+<b>Against it:</b> 7×7<br>
+<b>Decided by:</b> installs per thousand shown</p>
+<span class="tag">NOT RUN</span>
+</div>
+<div class="check">
+<small>Test 03 · changes the cat</small>
+<h3>Does the cat looking out from behind the cabinet help, and does it matter which cat?</h3>
+<p><b>Control:</b> white cat<br>
+<b>Against it:</b> orange cat<br>
+<b>Decided by:</b> share who touch the ad</p>
+<span class="tag">NOT RUN</span>
+</div>
+<div class="check">
+<small>Test 04 · changes the headline</small>
+<h3>Which line over the cabinet gets the first tap sooner?</h3>
+<p><b>Control:</b> “Brew your own potion!”<br>
+<b>Against it:</b> “Match 3 to brew a potion!”, “Relax and brew a potion”<br>
+<b>Decided by:</b> share who touch the ad</p>
+<span class="tag">NOT RUN</span>
+</div>
+<div class="check">
+<small>Test 05 · changes the colour</small>
+<h3>Does a calmer colour suit the relax opening better than the game&#x27;s own purple?</h3>
+<p><b>Control:</b> the game&#x27;s purple<br>
+<b>Against it:</b> emerald<br>
+<b>Decided by:</b> installs per thousand shown</p>
+<span class="tag">NOT RUN</span>
+</div>
+<div class="check">
+<small>Test 06 · changes the colour</small>
+<h3>Does a hotter colour lift the &#x27;almost full&#x27; opening?</h3>
+<p><b>Control:</b> the game&#x27;s purple<br>
+<b>Against it:</b> sunset<br>
+<b>Decided by:</b> installs per thousand shown</p>
+<span class="tag">NOT RUN</span>
+</div>
+<div class="check">
+<small>Test 07 · changes the headline</small>
+<h3>Does a search over the almost-full tray (&#x27;Where&#x27;s the third potion?&#x27;) get the first tap sooner than the dare &#x27;Can you save the tray?&#x27;?</h3>
+<p><b>Control:</b> “Can you save the tray?”<br>
+<b>Against it:</b> “Where&#x27;s the third potion?”<br>
+<b>Decided by:</b> share who touch the ad<br><b>Rests on:</b> <a href="https://www.facebook.com/ads/library/?id=906802798922176">ad 2176</a>, <a href="https://www.facebook.com/ads/library/?id=1419301390120911">ad 0911</a>, <a href="https://www.facebook.com/ads/library/?id=368730629097956">ad 7956</a>, 01-opening, 04-headline</p>
+<span class="tag agent">written by the test-writer agent</span> <span class="tag">NOT RUN</span>
+</div>
+<div class="check">
+<small>Test 08 · changes the headline</small>
+<h3>Does saying plainly that there is no timer get the first tap sooner than &#x27;Brew your own potion!&#x27;?</h3>
+<p><b>Control:</b> “Brew your own potion!”<br>
+<b>Against it:</b> “No timer. Just match 3.”<br>
+<b>Decided by:</b> share who touch the ad<br><b>Rests on:</b> <a href="https://www.facebook.com/ads/library/?id=1282346820647532">ad 7532</a>, <a href="https://www.facebook.com/ads/library/?id=1733176364606334">ad 6334</a>, <a href="https://www.facebook.com/ads/library/?id=879280074426551">ad 6551</a>, 04-headline</p>
+<span class="tag agent">written by the test-writer agent</span> <span class="tag">NOT RUN</span>
+</div>
+<div class="check">
+<small>Test 09 · changes when the hand comes back</small>
+<h3>Do more people reach the end card when the hand comes back after 1.5 seconds without a tap instead of 2?</h3>
+<p><b>Control:</b> after 2.0 s<br>
+<b>Against it:</b> after 1.5 s<br>
+<b>Decided by:</b> share who reach the end card<br><b>Rests on:</b> <a href="https://www.facebook.com/ads/library/?id=1733176364606334">ad 6334</a>, <a href="https://www.facebook.com/ads/library/?id=368730629097956">ad 7956</a>, <a href="https://www.facebook.com/ads/library/?id=1282346820647532">ad 7532</a>, <a href="https://www.facebook.com/ads/library/?id=1398153304988795">ad 8795</a>, 02-board-size</p>
+<span class="tag agent">written by the test-writer agent</span> <span class="tag">NOT RUN</span>
+</div>
+  </div>
+</section>
+
+<section>
+  <h2>What comes out</h2>
+  <p class="lead">One command builds every version. 18 versions take about 5 min. Each one gets:</p>
+  <div class="outs">
+    <div class="out"><b>4 playables</b><span>Meta, Google, one for AppLovin, Unity and ironSource, and a preview.</span></div>
+    <div class="out"><b>9 stills</b><span>The opening, the first match and the end card, in three shapes.</span></div>
+    <div class="out"><b>1 video</b><span>The ad playing itself to the end, with music.</span></div>
+    <div class="out"><b>15 or 21 or 22 checks</b><span>Each a yes or no, with the number behind it.</span></div>
+  </div>
+  <div class="inout">
+    <div>
+      <h3>A name you can read</h3>
+      <p>Every file is named after its parts, so a network's report can be traced back to its test.</p>
+      <div class="name" aria-label="mm_relax_7x7_royal_cat-white_brew-your-own-potion_c22bd3"><div><b>mm</b><span>game</span></div><div><b>relax</b><span>opening</span></div><div><b>7x7</b><span>cabinet</span></div><div><b>royal</b><span>colour</span></div><div><b>cat-white</b><span>cat</span></div><div><b>brew-your-own-potion</b><span>headline</span></div><div><b>c22bd3</b><span>every setting</span></div></div>
+    </div>
+    <div class="three">
+      <figure><img src="img/relax-royal.jpg" alt="The opening of the ad" loading="lazy"><figcaption>The opening</figcaption></figure>
+      <figure><img src="img/set.jpg" alt="The first match" loading="lazy"><figcaption>The first match</figcaption></figure>
+      <figure><img src="img/end.jpg" alt="The end card" loading="lazy"><figcaption>The end card</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Reading the results</h2>
+  <p class="lead">A network's report goes in as a spreadsheet. A version only wins if all three of these are true.</p>
+  <div class="checks by3">
+    <div class="check"><small>1</small><h3>Shown enough</h3><p>At least 5,000 views on each side. Before that, the test isn't read at all.</p></div>
+    <div class="check"><small>2</small><h3>Better by enough</h3><p>At least 10% better than the control on what the test is about.</p></div>
+    <div class="check"><small>3</small><h3>Not luck</h3><p>A difference bigger than chance would give 19 times out of 20.</p></div>
+  </div>
+  <div class="quote"><b>What the report says today:</b> “No results have been entered.” No test has run, and the report doesn't pretend otherwise.</div>
+  <p class="note">To try this step anyway, I made up a week of numbers (in <code>rehearsal/</code>, marked as made up everywhere). The agent read them correctly and suggested two next tests. That shows the loop works; it says nothing about how my ads would really do.</p>
+</section>
+
+<section>
+  <h2>How I know the ads work</h2>
+  <div class="checks">
+    <div class="check"><small>Rules</small><h3>The rules are written twice</h3><p>Once in Python, where levels are built, and once in JavaScript, where the ad runs. Tests play 200 random games through both and compare every tap.</p></div>
+    <div class="check"><small>Bots</small><h3>Bots play every level</h3><p>One taps at random, one picks what matches, one follows the hand. 1,000 games each.</p></div>
+    <div class="check"><small>Layout</small><h3>Measured, not eyeballed</h3><p>A test checks that every object sits inside its shelf on three phone shapes. I added it after bottles that looked fine to me were poking through the shelf above.</p></div>
+    <div class="check"><small>The hand</small><h3>Tapped where the finger is</h3><p>A test taps exactly where the helping hand's finger ends, in every ad and on three screens, and checks the ad takes what the hand meant.</p></div>
+  </div>
+  <div class="tablewrap">
+  <table>
+    <tr><th>How often a bot wins when it…</th><th>6×6</th><th>7×7</th><th>Can you save the tray?</th></tr>
+    <tr><td>follows the hand</td><td>100%</td><td>100%</td><td>100%</td></tr><tr><td>takes whatever matches the tray</td><td>99%</td><td>100%</td><td>100%</td></tr><tr><td>taps at random</td><td>0%</td><td>0%</td><td>12%</td></tr>
+  </table>
+  </div>
+  <div class="todo">
+    <b>Not done yet</b>
+    <ul>
+      <li>No ad has run on a network. There are no click, install or cost numbers anywhere on this page.</li>
+      <li>The market research is 25 ads I looked up by hand. It shows which ads are shown most, not which ones bring players.</li>
+      <li>No network has reviewed these files yet. Each network's own preview tool is the next check.</li>
+      <li>The square and wide pictures are weak: the ads are made for a phone held upright.</li>
+      <li>The game isn't in a store yet, so the button has nowhere to go.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p><a href="https://omeraydin0.github.io/word-tile-playable/">My first project, for a word game</a></p>
+  <p>Magic Market is my own game. The shelves, objects, tray, cauldron and rules come from the game. The witch, the gnomes, the cats and the painted scenes were made for the ads.</p>
+</footer>
+
+</div>
+<script>
+const PLAY = [{"id": "concept-gnome-heist", "group": "new", "label": "Gnome heist", "idea": "Masked gnomes drop through the skylight to steal potions. Tap them before they get away.", "headline": "Stop the potion thieves!"}, {"id": "concept-lights-out", "group": "new", "label": "Lights out in the village", "idea": "The candles blow out and the village goes dark. Your finger is a lantern: find what is hiding.", "headline": "Find them in the dark!"}, {"id": "concept-grumpy-gnomes", "group": "new", "label": "Serve the grumpy gnomes", "idea": "Grumpy gnomes shout their orders at the counter. Match three of what each one wants.", "headline": "Serve the grumpy gnomes!"}, {"id": "concept-cat-behind-jars", "group": "new", "label": "Cat behind the jars", "idea": "The shop cat is locked behind golden bars. Clear the whole cabinet to set it free.", "headline": "I can't get the cat out!"}, {"id": "concept-wrong-pick-toad", "group": "new", "label": "Wrong pick, toad!", "idea": "A gnome orders a potion. Pick the wrong ingredient and he turns into a toad.", "headline": "Wrong pick = toad!"}, {"id": "concept-clears-itself", "group": "new", "label": "It clears itself... almost", "idea": "The cabinet starts clearing itself, then stops and hands the rest to you.", "headline": "It clears itself... almost"}, {"id": "concept-boiling-over", "group": "new", "label": "It's boiling over!", "idea": "The cauldron is boiling over. Pop the bubbles and match three to calm it down.", "headline": "It's boiling over!"}, {"id": "relax-royal", "group": "main", "label": "Main ad", "idea": "The main ad: a 6×6 cabinet in the game's own purple, with the white cat.", "headline": "Brew your own potion!"}, {"id": "relax-royal-7x7", "group": "main", "label": "7×7 cabinet", "idea": "The same ad with a fuller 7×7 cabinet. The objects are smaller.", "headline": "Brew your own potion!"}, {"id": "tension-royal", "group": "main", "label": "Almost-full tray", "idea": "A tenser opening: the tray starts nearly full. Can you save it?", "headline": "Can you save the tray?"}, {"id": "relax-emerald", "group": "main", "label": "Emerald", "idea": "The same ad with the purples turned to green.", "headline": "Brew your own potion!"}, {"id": "relax-royal--cat-orange", "group": "main", "label": "Orange cat", "idea": "The same ad with an orange cat.", "headline": "Brew your own potion!"}, {"id": "tension-royal--headline-where-s-the-third-potion", "group": "main", "label": "Third potion", "idea": "A test the agent wrote: the same tense opening with a different line.", "headline": "Where's the third potion?"}];
+const VIDEOS = [{"id": "relax-royal", "label": "6×6, the control", "idea": "A full cabinet and no hurry. Five matches brew a potion."}, {"id": "relax-royal-7x7", "label": "7×7", "idea": "More shelves, smaller objects."}, {"id": "tension-royal", "label": "Can you save the tray?", "idea": "The tray starts five-sevenths full."}, {"id": "relax-emerald", "label": "Emerald", "idea": "The game's purples turned to green."}, {"id": "relax-royal--headline-no-timer-just-match-3", "label": "No timer", "idea": "Written by the test-writer agent, from a calm shelf ad's words."}, {"id": "tension-royal--headline-where-s-the-third-potion", "label": "Where's the third potion?", "idea": "Written by the test-writer agent, from a search ad."}];
+const ad = document.getElementById('ad');
+const groups = {new: document.getElementById('chips-new'), main: document.getElementById('chips-main')};
+const caption = document.getElementById('caption');
+const full = document.getElementById('full');
+function show(v) {
+  if (!ad.src.endsWith('play/' + v.id + '.html')) ad.src = 'play/' + v.id + '.html';
+  full.href = 'play/' + v.id + '.html';
+  caption.innerHTML = '<b>' + v.headline + '</b><br>' + v.idea;
+  document.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === v.id)));
+}
+PLAY.forEach((v) => {
+  const b = document.createElement('button');
+  b.className = 'chip';
+  b.type = 'button';
+  b.dataset.id = v.id;
+  b.textContent = v.label;
+  b.addEventListener('click', () => show(v));
+  groups[v.group].appendChild(b);
+});
+show(PLAY.find((v) => v.id === 'relax-royal') || PLAY[0]);
+
+const videos = document.getElementById('videos');
+VIDEOS.forEach((v) => {
+  const card = document.createElement('div');
+  card.className = 'vid';
+  card.innerHTML = '<video controls playsinline preload="none" poster="img/' + v.id + '.jpg" src="video/' + v.id + '.mp4"></video>'
+    + '<div><h3>' + v.label + '</h3><p>' + v.idea + '</p></div>';
+  videos.appendChild(card);
+});
+// one video at a time
+videos.addEventListener('play', (e) => {
+  videos.querySelectorAll('video').forEach((other) => { if (other !== e.target) other.pause(); });
+}, true);
+</script>
+<script data-goatcounter="https://magicmarket.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script>
+// which ads people play and which films they open, as events next to the page views
+function counted(name){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:name,title:name,event:true})}catch(e){}}
+document.addEventListener('click',(e)=>{const b=e.target.closest&&e.target.closest('.chip');if(b)counted('play/'+b.dataset.id)});
+document.addEventListener('play',(e)=>{const v=e.target;if(v&&v.tagName==='VIDEO')counted('video/'+(v.getAttribute('src')||'').split('/').pop())},true);
+document.addEventListener('click',(e)=>{const a=e.target.closest&&e.target.closest('#full');if(a)counted('fullscreen')});
+</script>
+</body>
+</html>
